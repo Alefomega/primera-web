@@ -1,2 +1,32 @@
-¡Hola mundo! x2
-<input type="text">
+<!DOCTYPE html>
+<html>
+<body>
+
+    <input type="text" id="caja" placeholder="Escribe y presiona Enter">
+    
+    <div id="lista"></div>
+
+    <script>
+        const input = document.getElementById('caja');
+        const lista = document.getElementById('lista');
+
+        input.addEventListener('keypress', function (e) {
+            // Verificamos si la tecla presionada es Enter
+            if (e.key === 'Enter') {
+                // 1. Creamos un nuevo elemento de texto (un párrafo)
+                const nuevoTexto = document.createElement('p');
+                
+                // 2. Le ponemos el contenido que tiene la caja
+                nuevoTexto.textContent = input.value;
+                
+                // 3. Lo metemos en el div "lista"
+                lista.appendChild(nuevoTexto);
+                
+                // 4. Limpiamos la caja para volver a escribir
+                input.value = '';
+            }
+        });
+    </script>
+
+</body>
+</html>
