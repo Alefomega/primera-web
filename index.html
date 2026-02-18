@@ -1,30 +1,39 @@
 <!DOCTYPE html>
 <html>
+<head>
+    <meta charset="UTF-8">
+    <title>Input a Supabase</title>
+</head>
 <body>
-<a href="superbase.html">Ir a Superbase 1</a><br>
-<a href="superbase2.html">Ir a Superbase 2</a><br><br>
 
-    <input type="text" id="caja" placeholder="Escribe y presiona Enter">
-    
-    <div id="lista"></div>
+    <a href="superbase.html" style="display:block;">Superbase 1</a>
+    <a href="superbase2.html" style="display:block;">Superbase 2</a>
 
-    <script>
-        const input = document.getElementById('caja');
-        const lista = document.getElementById('lista');
+    <br>
 
-        input.addEventListener('keypress', function (e) {
-            // Verificamos si la tecla presionada es Enter
+    <input id="miInput" type="text" placeholder="Escribe algo...">
+    <div id="mostrar"></div>
+
+    <script type="module">
+        import { agregarMensaje } from './app.js';
+
+        const input = document.getElementById('miInput');
+        const mostrar = document.getElementById('mostrar');
+
+        input.addEventListener('keypress', async (e) => {
             if (e.key === 'Enter') {
-                // 1. Creamos un nuevo elemento de texto (un párrafo)
-                const nuevoTexto = document.createElement('p');
-                
-                // 2. Le ponemos el contenido que tiene la caja
-                nuevoTexto.textContent = input.value;
-                
-                // 3. Lo metemos en el div "lista"
-                lista.appendChild(nuevoTexto);
-                
-                // 4. Limpiamos la caja para volver a escribir
+                const valor = input.value.trim();
+                if (!valor) return;
+
+                // 1. Mostrar en pantalla
+                const p = document.createElement('p');
+                p.textContent = valor;
+                mostrar.appendChild(p);
+
+                // 2. Agregar a Supabase
+                await agregarMensaje(valor);
+
+                // 3. Limpiar input
                 input.value = '';
             }
         });

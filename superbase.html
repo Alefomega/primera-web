@@ -1,33 +1,30 @@
 <!DOCTYPE html>
 <html>
+<head>
+    <meta charset="UTF-8">
+    <title>Superbase 1 fila</title>
+</head>
 <body>
 
-    <h1 id="mensaje">Cargando mensaje de la nube...</h1>
+    <h1 id="mensaje">Cargando mensaje...</h1>
 
     <script type="module">
-        // 1. Conectamos con la librería de la base de datos
-        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
-        
-        // 2. Tus llaves (las sacas de Settings > API)
-        const supabase = createClient('https://wmrxcnnehjjslyqtcogq.supabase.co', 'sb_publishable_rbrk7RzRx6Z-1i0f0IFrGQ_HW3Twqqn')
+        import { obtenerMensajes } from './app.js';  // importamos la función desde app.js
 
-        async function cargarMensaje() {
-            // 3. Pedimos el texto de la tabla 'notas'
-            const { data, error } = await supabase
-                .from('Aprendiendo')
-                .select('text')
-                .limit(1); // Solo queremos una fila
+        async function cargarPrimerMensaje() {
+            const mensajes = await obtenerMensajes();  // devuelve array de filas
+            const primerMensaje = mensajes[0];         // tomamos solo la primera fila
 
-            if (data) {
-                document.getElementById('mensaje').innerText = data[0].text;
+            const h1 = document.getElementById('mensaje');
+
+            if (primerMensaje) {
+                h1.textContent = primerMensaje.text;  // mostramos el texto en el h1
             } else {
-                console.error("Error:", error);
-                document.getElementById('mensaje').innerText = "No se pudo conectar";
+                h1.textContent = "No hay mensajes";
             }
         }
 
-        // Ejecutamos la función al abrir la web
-        cargarMensaje();
+        cargarPrimerMensaje();
     </script>
 
 </body>
