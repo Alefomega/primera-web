@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+    <h1 id="mensaje">Cargando mensaje de la nube...</h1>
+
+    <script type="module">
+        // 1. Conectamos con la librería de la base de datos
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+        
+        // 2. Tus llaves (las sacas de Settings > API)
+        const supabase = createClient('https://wmrxcnnehjjslyqtcogq.supabase.co', 'sb_publishable_rbrk7RzRx6Z-1i0f0IFrGQ_HW3Twqqn')
+
+        async function cargarMensaje() {
+            // 3. Pedimos el texto de la tabla 'notas'
+            const { data, error } = await supabase
+                .from('Aprendiendo')
+                .select('text')
+                .single(); // Solo queremos una fila
+
+            if (data) {
+                document.getElementById('mensaje').innerText = data.text;
+            } else {
+                console.error("Error:", error);
+                document.getElementById('mensaje').innerText = "No se pudo conectar";
+            }
+        }
+
+        // Ejecutamos la función al abrir la web
+        cargarMensaje();
+    </script>
+
+</body>
+</html>

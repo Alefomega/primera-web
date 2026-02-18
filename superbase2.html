@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+    <h1>Mensajes de la nube</h1>
+    <ul id="lista"></ul> <!-- Aquí se mostrarán todas las filas -->
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+        
+        const supabase = createClient(
+            'https://wmrxcnnehjjslyqtcogq.supabase.co',
+            'sb_publishable_rbrk7RzRx6Z-1i0f0IFrGQ_HW3Twqqn'
+        );
+
+        async function cargarMensajes() {
+            const { data, error } = await supabase
+                .from('Aprendiendo')
+                .select('id, text');  // ahora pedimos todas las columnas
+
+            if (error) {
+                console.error("Error:", error);
+                document.getElementById('lista').innerHTML =
+                    "<li>No se pudo conectar</li>";
+                return;
+            }
+
+            // data es un ARRAY → recorremos y creamos <li>
+            const lista = document.getElementById('lista');
+            lista.innerHTML = ""; // limpiar antes
+
+            data.forEach(fila => {
+                const li = document.createElement('li');
+                li.textContent = `${fila.id}: ${fila.text}`;
+                lista.appendChild(li);
+            });
+        }
+
+        cargarMensajes();
+    </script>
+
+</body>
+</html>
