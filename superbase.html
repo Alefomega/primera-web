@@ -16,10 +16,10 @@
             const { data, error } = await supabase
                 .from('Aprendiendo')
                 .select('text')
-                .single(); // Solo queremos una fila
+                .limit(1); // Solo queremos una fila
 
             if (data) {
-                document.getElementById('mensaje').innerText = data.text;
+                document.getElementById('mensaje').innerText = data[0].text;
             } else {
                 console.error("Error:", error);
                 document.getElementById('mensaje').innerText = "No se pudo conectar";
