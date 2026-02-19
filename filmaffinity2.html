@@ -12,7 +12,7 @@
     <button id="btnBuscar">Buscar</button>
 
     <div id="resultado" style="margin-top: 20px; font-family: sans-serif;"></div>
-
+    <div id="crudo" style="margin-top: 20px;"></div>
     <script>
         document.getElementById('btnBuscar').addEventListener('click', buscar);
         document.getElementById('busqueda').addEventListener('keypress', (e) => {
@@ -38,6 +38,7 @@
 
                 if (data.resultados.length === 0) {
                     resultado.textContent = 'No se encontraron resultados';
+                    document.getElementById('crudo').innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`
                     return;
                 }
 
