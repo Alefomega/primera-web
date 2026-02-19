@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Filmaffinity Búsqueda</title>
+</head>
+<body>
+
+    <h1>Filmaffinity Búsqueda</h1>
+
+    <input id="busqueda" type="text" placeholder="Escribe un título...">
+    <button id="btnBuscar">Buscar</button>
+
+    <div id="resultado" style="margin-top: 20px; font-family: sans-serif;"></div>
+
+    <script>
+        document.getElementById('btnBuscar').addEventListener('click', buscar);
+        document.getElementById('busqueda').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') buscar();
+        });
+
+        async function buscar() {
+            const q = document.getElementById('busqueda').value.trim();
+            const resultado = document.getElementById('resultado');
+
+            if (!q) return;
+
+            resultado.textContent = 'Cargando...';
+
+            try {
+                const res = await fetch(`/api/filmaffinity-search?q=${encodeURIComponent(q)}`);
+                const data = await res.json();
+
+                if (data.error) {
+                    resultado.textContent = 'Error: ' + data.error;
+                    return;
+                }
+
+                if (data.resultados.length === 0) {
+                    resultado.textContent = 'No se encontraron resultados';
+                    return;
+                }
+
+                resultado.innerHTML = data.resultados.map((r, i) => `
+                    <p>${i + 1}. <strong>${r.titulo ?? '?'}</strong> (${r.anio ?? '?'}) — ${r.director ?? '?'}</p>
+                `).join('');
+
+            } catch (e) {
+                resultado.textContent = 'Error de red: ' + e.message;
+            }
+        }
+    </script>
+
+</body>
+</html>
