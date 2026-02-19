@@ -22,7 +22,7 @@ export default async function handler(req, res) {
         }
 
         const html = await response.text();
-
+return res.status(200).json({ html: html.substring(0, 3000) });
         // Extraer bloques de cada resultado
         const bloques = html.match(/<div[^>]*class="[^"]*se-it[^"]*"[^>]*>[\s\S]*?<\/div>\s*<\/div>\s*<\/div>/g) || [];
 
