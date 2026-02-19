@@ -1,13 +1,13 @@
 // api/filmaffinity-search.js
 export default async function handler(req, res) {
-    const { q } = req.query;
+    const { stext } = req.query;
 
-    if (!q) {
-        return res.status(400).json({ error: 'Falta el parámetro q' });
+    if (!stext) {
+        return res.status(400).json({ error: 'Falta el parámetro stext' });
     }
 
     try {
-        const url = `https://www.filmaffinity.com/es/search.php?stype=title&stext=${encodeURIComponent(q)}`;
+        const url = `https://www.filmaffinity.com/es/search.php?stype=title&stext=${encodeURIComponent(stext)}`;
 
         const response = await fetch(url, {
             headers: {
@@ -18,36 +18,71 @@ export default async function handler(req, res) {
         });
 
         if (!response.ok) {
-            return res.status(response.status).json({ error: `Filmaffinity respondió con error ${response.status}` });
+            return res.status(response.status).json({ 
+                error: `FilmAffinity respondió con error ${response.status}`,
+                htmlCrudo: null
+            });
         }
 
         const html = await response.text();
-return res.status(200).json({ html: html.substring(0, 3000) });
-        // Extraer bloques de cada resultado
-        const bloques = html.match(/<div[^>]*class="[^"]*se-it[^"]*"[^>]*>[\s\S]*?<\/div>\s*<\/div>\s*<\/div>/g) || [];
 
-        const resultados = bloques.slice(0, 10).map(bloque => {
-            const titulo = extraer(bloque, /<div[^>]*class="[^"]*mc-title[^"]*"[^>]*>.*?<a[^>]*>(.*?)<\/a>/s);
-            const anio = extraer(bloque, /<div[^>]*class="[^"]*ye-w[^"]*"[^>]*>(.*?)<\/div>/s);
-            const director = extraer(bloque, /<div[^>]*class="[^"]*mc-director[^"]*"[^>]*>.*?<span[^>]*>(.*?)<\/span>/s);
+        // Raspar los primeros 10 resultados
+        const resultados = [];
+        
+        // Regex para encontrar cada resultado - busca links con clase "movie" o similares
+        const regexItems = /<div[^>]*class="[^"]*item[^"]*"[^>]*>.*?<a[^>]*href="([^"]*)"[^>]*>([^<]+)<\/a>.*?<\/div>/gs;
+        
+        let match;
+        let count = 0;
 
-            return {
-                titulo: limpiar(titulo),
-                anio: limpiar(anio),
-                director: limpiar(director),
-            };
-        }).filter(r => r.titulo); // filtrar resultados vacíos
+        while ((match = regexItems.exec(html)) && count < 10) {
+            const url = match[1];
+            const titulo = limpiar(match[2]);
 
-        return res.status(200).json({ resultados });
+            if (titulo) {
+                // Intentar extraer el año si está disponible cerca del título
+                const contexto = html.substring(match.index, match.index + 300);
+                const anoMatch = contexto.match(/\((\d{4})\)/);
+                const ano = anoMatch ? anoMatch[1] : null;
+
+                resultados.push({
+                    titulo: titulo,
+                    ano: ano,
+                    nota: null,
+                    url: url.startsWith('http') ? url : `https://www.filmaffinity.com${url}`
+                });
+                count++;
+            }
+        }
+
+        // Si el regex de arriba no funciona bien, intentar otro patrón
+        if (resultados.length === 0) {
+            const regexAlt = /<a[^>]*href="\/es\/(film|tv)[^"]*"[^>]*>([^<]+)<\/a>/g;
+            while ((match = regexAlt.exec(html)) && count < 10) {
+                const titulo = limpiar(match[2]);
+                if (titulo && !resultados.some(r => r.titulo === titulo)) {
+                    resultados.push({
+                        titulo: titulo,
+                        ano: null,
+                        nota: null,
+                        url: `https://www.filmaffinity.com${match[1]}`
+                    });
+                    count++;
+                }
+            }
+        }
+
+        return res.status(200).json({
+            resultados: resultados,
+            htmlCrudo: html
+        });
 
     } catch (error) {
-        return res.status(500).json({ error: 'Error al hacer fetch a filmaffinity', detalle: error.message });
+        return res.status(500).json({ 
+            error: 'Error al hacer fetch a filmaffinity: ' + error.message,
+            htmlCrudo: null
+        });
     }
-}
-
-function extraer(html, regex) {
-    const match = html.match(regex);
-    return match ? match[1] : null;
 }
 
 function limpiar(texto) {

@@ -3,54 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <title>Filmaffinity Búsqueda</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; }
+        .container { max-width: 800px; }
+        input { width: 300px; padding: 8px; font-size: 16px; }
+        button { padding: 8px 20px; font-size: 16px; cursor: pointer; }
+        .resultados { margin-top: 20px; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        .resultado-item { margin-bottom: 15px; padding: 10px; background: #f5f5f5; border-radius: 3px; }
+        .debug { margin-top: 20px; padding: 15px; background: #ffe6e6; border: 1px solid #ff6666; border-radius: 5px; }
+        .debug-toggle { cursor: pointer; color: #0066cc; text-decoration: underline; }
+        #htmlCrudo { display: none; max-height: 300px; overflow-y: auto; background: white; padding: 10px; border: 1px solid #ddd; margin-top: 10px; font-size: 12px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
 </head>
 <body>
 
-    <h1>Filmaffinity Búsqueda</h1>
+    <div class="container">
+        <h1>Filmaffinity Búsqueda</h1>
 
-    <input id="busqueda" type="text" placeholder="Escribe un título...">
-    <button id="btnBuscar">Buscar</button>
+        <div>
+            <input id="busqueda" type="text" placeholder="Busca una película o serie...">
+            <button id="btnBuscar">Buscar</button>
+        </div>
 
-    <div id="resultado" style="margin-top: 20px; font-family: sans-serif;"></div>
-    <div id="crudo" style="margin-top: 20px;"></div>
-    <script>
-        document.getElementById('btnBuscar').addEventListener('click', buscar);
-        document.getElementById('busqueda').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') buscar();
-        });
+        <div id="resultado" class="resultados" style="display: none;">
+            <h2>Resultados</h2>
+            <div id="resultadoLista"></div>
+        </div>
 
-        async function buscar() {
-            const q = document.getElementById('busqueda').value.trim();
-            const resultado = document.getElementById('resultado');
+        <div id="debug" class="debug" style="display: none;">
+            <p><span class="debug-toggle" onclick="document.getElementById('htmlCrudo').style.display = document.getElementById('htmlCrudo').style.display === 'none' ? 'block' : 'none'">📋 Ver HTML crudo (click para expandir)</span></p>
+            <div id="htmlCrudo"></div>
+        </div>
+    </div>
 
-            if (!q) return;
-
-            resultado.textContent = 'Cargando...';
-
-            try {
-                const res = await fetch(`/api/filmaffinity-search?q=${encodeURIComponent(q)}`);
-                const data = await res.json();
-
-                if (data.error) {
-                    resultado.textContent = 'Error: ' + data.error;
-                    return;
-                }
-
-                if (data.resultados.length === 0) {
-                    resultado.textContent = 'No se encontraron resultados';
-                    document.getElementById('crudo').innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`
-                    return;
-                }
-
-                resultado.innerHTML = data.resultados.map((r, i) => `
-                    <p>${i + 1}. <strong>${r.titulo ?? '?'}</strong> (${r.anio ?? '?'}) — ${r.director ?? '?'}</p>
-                `).join('');
-
-            } catch (e) {
-                resultado.textContent = 'Error de red: ' + e.message;
-            }
-        }
-    </script>
+    <script src="filmaffinity2.js"></script>
 
 </body>
 </html>
