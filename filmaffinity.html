@@ -8,10 +8,47 @@
 
     <h1>Filmaffinity Buscador</h1>
 
-    <input id="busqueda" type="text" placeholder="Escribe el título de la película...">
+    <input id="busqueda" type="text" placeholder="Pega la URL de la ficha..." style="width: 400px;">
     <button id="btnBuscar">Buscar</button>
 
-  
+    <div id="resultado" style="margin-top: 20px; font-family: sans-serif;"></div>
+
+    <script>
+        document.getElementById('btnBuscar').addEventListener('click', buscar);
+        document.getElementById('busqueda').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') buscar();
+        });
+
+        async function buscar() {
+            const url = document.getElementById('busqueda').value.trim();
+            const resultado = document.getElementById('resultado');
+
+            if (!url) return;
+
+            resultado.textContent = 'Cargando...';
+
+            try {
+                const res = await fetch(`/api/filmaffinity?url=${encodeURIComponent(url)}`);
+                const data = await res.json();
+
+                if (data.error) {
+                    resultado.textContent = 'Error: ' + data.error;
+                    return;
+                }
+
+                resultado.innerHTML = `
+                    <p><strong>Título:</strong> ${data.titulo ?? 'No encontrado'}</p>
+                    <p><strong>Año:</strong> ${data.anio ?? 'No encontrado'}</p>
+                    <p><strong>Director:</strong> ${data.director ?? 'No encontrado'}</p>
+                    <p><strong>Duración:</strong> ${data.duracion ?? 'No encontrado'}</p>
+                    <p><strong>Nota:</strong> ${data.nota ?? 'No encontrado'}</p>
+                    <p><strong>Sinopsis:</strong> ${data.sinopsis ?? 'No encontrado'}</p>
+                `;
+            } catch (e) {
+                resultado.textContent = 'Error de red: ' + e.message;
+            }
+        }
+    </script>
 
 </body>
 </html>
